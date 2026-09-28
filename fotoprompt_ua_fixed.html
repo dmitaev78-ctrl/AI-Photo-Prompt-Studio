@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ФотоПромпт — генератор промптів для фотосесії</title>
+<style>
+:root{--bg:#090a0d;--card:#12141a;--muted:#9297a6;--text:#f5f7fb;--line:#262a34;--acc:#b7ff5a;--acc2:#7dd3fc;--danger:#ff7d7d}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 15% 0,#182019 0,transparent 30%),var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:28px 18px 60px}.hero{display:flex;gap:18px;align-items:end;justify-content:space-between;margin-bottom:22px}.eyebrow{color:var(--acc);font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}.hero h1{font-size:clamp(32px,5vw,64px);line-height:.95;margin:8px 0 10px;max-width:760px}.hero p{color:var(--muted);max-width:700px;margin:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:rgba(18,20,26,.94);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 16px 50px #0005}.card h2{font-size:18px;margin:0 0 14px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}
+label{display:block;color:#c9ced9;font-size:12px;font-weight:700;margin:0 0 6px}select,input,textarea{width:100%;background:#0b0d12;color:var(--text);border:1px solid #303541;border-radius:12px;padding:11px 12px;outline:none}textarea{min-height:84px;resize:vertical}select:focus,input:focus,textarea:focus{border-color:var(--acc)}
+.segment{display:flex;background:#0b0d12;border:1px solid var(--line);padding:4px;border-radius:13px}.segment button{flex:1;border:0;border-radius:9px;padding:10px;background:transparent;color:var(--muted);font-weight:800;cursor:pointer}.segment button.on{background:var(--acc);color:#10140c}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}button.primary,button.secondary{border:0;border-radius:12px;padding:12px 16px;font-weight:900;cursor:pointer}.primary{background:var(--acc);color:#10140c}.secondary{background:#252a34;color:#fff}.hint{font-size:12px;color:var(--muted);margin-top:8px}
+.output{min-height:500px;white-space:pre-wrap;background:#0b0d12;border:1px solid var(--line);border-radius:15px;padding:16px;color:#e9edf5;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;overflow:auto}.badge{display:inline-flex;border:1px solid #3a4231;color:var(--acc);padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800;margin-bottom:12px}
+footer{color:var(--muted);font-size:12px;margin-top:16px}.ok{color:var(--acc)}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.hero{display:block}.fields{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">AI Photo Prompt Studio</div>
+      <h1>ФотоПромпт</h1>
+      <p>Створи детальний промпт для одного кадру або цілої фотосесії. Камера, оптика, світло, композиція, стиль і технічні параметри — в одному місці.</p>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card">
+      <h2>Налаштування фотосесії</h2>
+      <div class="fields">
+        <div class="full">
+          <label>Режим</label>
+          <div class="segment"><button id="oneBtn" class="on" type="button">1 фото</button><button id="seriesBtn" type="button">Серія</button></div>
+        </div>
+
+        <div class="full"><label>Що / хто в кадрі</label><textarea id="subject" placeholder="Напр.: дівчина 25 років у чорному пальті, природна зовнішність, легкий вітер у волоссі"></textarea></div>
+
+        <div><label>Тип техніки</label><select id="gearType"><option>Фотокамера</option><option>Apple iPhone</option><option>Google Pixel</option></select></div>
+        <div><label>Камера / телефон</label><select id="camera"></select></div>
+        <div><label>Об’єктив / фокусна</label><select id="lens"></select></div>
+        <div><label>Діафрагма</label><select id="aperture"><option>f/1.2</option><option>f/1.4</option><option selected>f/1.8</option><option>f/2</option><option>f/2.8</option><option>f/4</option><option>f/5.6</option><option>f/8</option><option>автоматично</option></select></div>
+
+        <div><label>Жанр</label><select id="genre"><option>портрет</option><option>fashion / editorial</option><option>street style</option><option>beauty</option><option>lifestyle</option><option>cinematic</option><option>ділова фотосесія</option><option>love story</option><option>предметна зйомка</option><option>автомобільна зйомка</option><option>подорож / travel</option></select></div>
+        <div><label>План кадру</label><select id="shot"><option>крупний портрет</option><option selected>середній план</option><option>повний зріст</option><option>екстремальний крупний план</option><option>широкий кадр</option><option>деталь</option></select></div>
+
+        <div><label>Світло</label><select id="light"><option>м’яке природне світло</option><option>золота година</option><option>синя година</option><option>жорстке сонячне світло</option><option>віконне світло</option><option>студійний softbox</option><option>Rembrandt lighting</option><option>контрове світло</option><option>неонове світло</option><option>нічне міське освітлення</option></select></div>
+        <div><label>Ракурс</label><select id="angle"><option>на рівні очей</option><option>низький ракурс</option><option>високий ракурс</option><option>3/4</option><option>профіль</option><option>вид зверху</option><option>через плече</option></select></div>
+
+        <div><label>Локація</label><input id="location" placeholder="Напр.: дах у центрі Києва"></div>
+        <div><label>Час / погода</label><input id="weather" placeholder="Напр.: після дощу, вечір"></div>
+
+        <div><label>Кольорова палітра</label><select id="palette"><option>натуральні кольори</option><option>тепла кінематографічна</option><option>холодна мінімалістична</option><option>пастельна</option><option>монохромна</option><option>насичена editorial</option><option>teal & orange</option></select></div>
+        <div><label>Співвідношення сторін</label><select id="ratio"><option>4:5</option><option>4:3</option><option>3:4</option><option>3,5×4,5</option><option>3:2</option><option>2:3</option><option>1:1</option><option>16:9</option><option>9:16</option></select></div>
+
+        <div id="countWrap" style="display:none"><label>Кількість кадрів у серії</label><select id="count"><option>3</option><option selected>5</option><option>7</option><option>10</option></select></div>
+        <div><label>Рівень реалізму</label><select id="realism"><option>максимально фотореалістично</option><option>натурально, без надмірної ретуші</option><option>глянцевий журнал</option><option>аналогова плівкова естетика</option></select></div>
+
+        <div class="full"><label><input id="referenceLock" type="checkbox" checked style="width:auto;margin-right:7px;accent-color:var(--acc)">Зберігати зовнішність з референсу без змін</label><div class="hint" style="margin:0 0 10px">Фіксує ідентичність: обличчя, риси, вік, пропорції, колір очей, волосся та природну текстуру шкіри.</div></div>
+        <div class="full"><label>Одяг, реквізит, деталі</label><textarea id="details" placeholder="Напр.: чорний тренч, срібні сережки, мокрий асфальт, без логотипів"></textarea></div>
+        <div class="full"><label>Чого уникати</label><input id="negative" value="пластикова шкіра, зайві пальці, деформовані руки, неприродні очі, текст, водяні знаки, логотипи"></div>
+      </div>
+      <div class="actions"><button class="primary" id="generate">Створити промпт</button><button class="secondary" id="random">Випадковий стиль</button></div>
+      <div class="hint">Для смартфонів фокусна відстань подається як еквівалент повнокадрової камери, якщо це доречно.</div>
+    </section>
+
+    <section class="card">
+      <div class="badge">ГОТОВИЙ ПРОМПТ</div>
+      <div id="output" class="output">Заповни параметри зліва та натисни «Створити промпт».</div>
+      <div class="actions"><button class="primary" id="copy">Копіювати</button><button class="secondary" id="download">Зберегти .txt</button></div>
+      <div id="copyStatus" class="hint"></div>
+    </section>
+  </main>
+  <footer>ФотоПромпт працює локально у браузері — сервер не потрібен. Назви техніки використовуються лише як опис бажаної фотоестетики.</footer>
+</div>
+
+<script>
+const cameras = {
+"Фотокамера":[
+"Canon EOS R1","Canon EOS R3","Canon EOS R5 Mark II","Canon EOS R5","Canon EOS R6 Mark II","Canon EOS R8","Canon EOS R7",
+"Nikon Z9","Nikon Z8","Nikon Z6 III","Nikon Zf","Nikon Z5 II",
+"Sony α1 II","Sony α1","Sony α9 III","Sony α7R V","Sony α7 IV","Sony α7C II","Sony α7CR","Sony FX3",
+"Fujifilm GFX100 II","Fujifilm GFX100S II","Fujifilm X-H2","Fujifilm X-H2S","Fujifilm X-T5","Fujifilm X100VI",
+"Panasonic Lumix S1R II","Panasonic Lumix S5IIX","Panasonic Lumix S5II","Panasonic Lumix GH7",
+"Leica SL3","Leica Q3","Leica M11","Hasselblad X2D 100C","OM System OM-1 Mark II"
+],
+"Apple iPhone":[
+"iPhone 7","iPhone 7 Plus","iPhone 8","iPhone 8 Plus","iPhone X","iPhone XS","iPhone XS Max",
+"iPhone 11","iPhone 11 Pro","iPhone 11 Pro Max","iPhone 12","iPhone 12 mini","iPhone 12 Pro","iPhone 12 Pro Max",
+"iPhone 13","iPhone 13 mini","iPhone 13 Pro","iPhone 13 Pro Max","iPhone 14","iPhone 14 Plus","iPhone 14 Pro","iPhone 14 Pro Max",
+"iPhone 15","iPhone 15 Plus","iPhone 15 Pro","iPhone 15 Pro Max","iPhone 16","iPhone 16 Plus","iPhone 16 Pro","iPhone 16 Pro Max",
+"iPhone 17","iPhone Air","iPhone 17 Pro","iPhone 17 Pro Max","iPhone 18","iPhone 18 Pro","iPhone 18 Pro Max"
+],
+"Google Pixel":[
+"Pixel 3","Pixel 3 XL","Pixel 3a","Pixel 3a XL","Pixel 4","Pixel 4 XL","Pixel 4a","Pixel 5","Pixel 5a",
+"Pixel 6","Pixel 6 Pro","Pixel 6a","Pixel 7","Pixel 7 Pro","Pixel 7a","Pixel 8","Pixel 8 Pro","Pixel 8a",
+"Pixel 9","Pixel 9 Pro","Pixel 9 Pro XL","Pixel 9 Pro Fold","Pixel 9a",
+"Pixel 10","Pixel 10 Pro","Pixel 10 Pro XL","Pixel 10 Pro Fold","Pixel 10a",
+"Pixel 11","Pixel 11 Pro","Pixel 11 Pro XL","Pixel 11 Pro Fold"
+]};
+const lenses={
+"Фотокамера":["14mm ultra-wide","16-35mm f/2.8","24mm f/1.4","24-70mm f/2.8","28mm f/1.4","35mm f/1.4","40mm","50mm f/1.2","50mm f/1.4","50mm f/1.8","85mm f/1.2","85mm f/1.4","85mm f/1.8","105mm f/1.4","135mm f/1.8","70-200mm f/2.8","100mm macro","200mm telephoto"],
+"Apple iPhone":["основна камера / 1×","ультраширока / 0.5×","телефото / 2×","телефото / 3×","телефото / 5×","портретний режим"],
+"Google Pixel":["основна камера / 1×","ультраширока / 0.5×","телефото / 2×","телефото / 5×","Pro Zoom / дальній план","портретний режим"]
+};
+const $=id=>document.getElementById(id);
+let mode="one";
+function fill(){
+ let t=$("gearType").value;
+ $("camera").innerHTML=cameras[t].map(x=>`<option>${x}</option>`).join("");
+ $("lens").innerHTML=lenses[t].map(x=>`<option>${x}</option>`).join("");
+}
+$("gearType").onchange=fill; fill();
+$("oneBtn").onclick=()=>{mode="one";$("oneBtn").classList.add("on");$("seriesBtn").classList.remove("on");$("countWrap").style.display="none"}
+$("seriesBtn").onclick=()=>{mode="series";$("seriesBtn").classList.add("on");$("oneBtn").classList.remove("on");$("countWrap").style.display=""}
+function val(id,fallback="не вказано"){return $(id).value.trim()||fallback}
+function base(){
+ const refLock=$("referenceLock").checked ? `REFERENCE IDENTITY LOCK: Use the provided reference image as the strict identity source. Preserve the exact same person and recognizable facial identity: facial structure, face shape, eyes, eyebrows, nose, lips, jawline, ears, skin tone and natural skin texture, apparent age, hair color and characteristic features. Do not beautify, reinterpret, redesign, face-swap, age up/down, or change ethnicity or identity. Changes in pose, expression, camera angle, lighting, clothing and environment must not alter identity. The result must clearly remain the same person as in the reference.` : ``;
+ return `${refLock}\n\nФотореалістична ${val("genre")} фотографія. Головний об’єкт: ${val("subject","виразний головний об’єкт")}. Локація: ${val("location")}. Умови: ${val("weather")}. Знято на ${val("camera")} з ${val("lens")}, діафрагма ${val("aperture")}. ${val("shot")}, ракурс ${val("angle")}. Освітлення: ${val("light")}. Кольорова палітра: ${val("palette")}. Візуальна якість: ${val("realism")}. Одяг / реквізит / важливі деталі: ${val("details")}. Реалістична текстура шкіри й матеріалів, природна анатомія, правдоподібна оптика, фізично коректне світло, деталізовані тіні та відблиски, професійна фотографічна композиція. Формат кадру ${val("ratio")}. Уникати: ${val("negative")}.`;
+}
+const seriesIdeas=[
+"встановлювальний широкий кадр, герой взаємодіє з локацією",
+"портрет по пояс, прямий контакт з камерою, спокійна природна поза",
+"динамічний кадр у русі, легкий природний motion feel",
+"крупний портрет з акцентом на очі, шкіру та світлотінь",
+"кадр у профіль або 3/4, увага до силуету й фону",
+"деталь рук, аксесуара або фактури одягу",
+"повний зріст, сильна геометрія композиції",
+"емоційний candid-кадр, ніби момент знято ненавмисно",
+"низький ракурс з виразною перспективою",
+"фінальний атмосферний кадр з більшою кількістю середовища"
+];
+function generate(){
+ let p=base();
+ if(mode==="series"){
+  const n=+$("count").value;
+  p=`СТВОРИ ЦІЛІСНУ ФОТОСЕСІЮ З ${n} КАДРІВ.\n\nУсі кадри мають показувати ту саму людину/об’єкт, той самий одяг, локацію, час доби, кольорову обробку та впізнавані риси. Якщо увімкнено Reference Identity Lock, референс є головним джерелом ідентичності: не змінюй обличчя або зовнішність між кадрами. Зберігай візуальну безперервність між зображеннями.\n\nБАЗОВІ ПАРАМЕТРИ:\n${p}\n\nКАДРИ СЕРІЇ:\n`+
+  Array.from({length:n},(_,i)=>`${i+1}. ${seriesIdeas[i%seriesIdeas.length]}.`).join("\n")+
+  `\n\nНе змінюй зовнішність героя між кадрами. Варіюй композицію, позу, крупність і ракурс, але зберігай єдину історію та фотографічний стиль.`;
+ } else p=`СТВОРИ ОДНЕ ФОТО.\n\n${p}\n\nОдин завершений кадр, без колажу, без контактного листа, без поділу зображення на панелі.`;
+ $("output").textContent=p;
+}
+$("generate").onclick=generate;
+$("random").onclick=()=>{
+ const ids=["genre","shot","light","angle","palette","ratio"];
+ ids.forEach(id=>{let e=$(id);e.selectedIndex=Math.floor(Math.random()*e.options.length)});
+ generate();
+}
+$("copy").onclick=async()=>{
+ const value=$("output").textContent;
+ let copied=false;
+
+ // Сучасний Clipboard API (працює у HTTPS/localhost).
+ if(navigator.clipboard && window.isSecureContext){
+   try{
+     await navigator.clipboard.writeText(value);
+     copied=true;
+   }catch(e){}
+ }
+
+ // Резервний спосіб для локального HTML (file://) та браузерів,
+ // де navigator.clipboard недоступний або заблокований.
+ if(!copied){
+   const ta=document.createElement("textarea");
+   ta.value=value;
+   ta.setAttribute("readonly","");
+   ta.style.position="fixed";
+   ta.style.left="-9999px";
+   ta.style.top="0";
+   document.body.appendChild(ta);
+   ta.focus();
+   ta.select();
+   ta.setSelectionRange(0,ta.value.length);
+   try{
+     copied=document.execCommand("copy");
+   }catch(e){
+     copied=false;
+   }
+   document.body.removeChild(ta);
+ }
+
+ if(copied){
+   $("copyStatus").innerHTML='<span class="ok">Скопійовано ✓</span>';
+ }else{
+   $("copyStatus").textContent="Браузер заблокував копіювання. Виділи текст промпту та скопіюй вручну.";
+ }
+}
+$("download").onclick=()=>{
+ const blob=new Blob([$("output").textContent],{type:"text/plain;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="foto-prompt.txt";a.click();URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>
